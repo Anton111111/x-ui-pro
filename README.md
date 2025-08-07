@@ -19,6 +19,8 @@
 - Linux Debian12/Ubuntu24!
   >
 
+**Docker required for AmneziaWG Easy**
+
 **You need two domains or subdomains**
   1. For panel and WebSocket/GRPC/HttpUgrade/SplitHttp
   2. For REALITY destination
