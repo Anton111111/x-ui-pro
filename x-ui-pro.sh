@@ -456,7 +456,7 @@ else
   x-ui restart
 fi
 
-###################################Install X-UI#########################################################
+###################################Install AmneziaWG Easy#########################################################
 awg_password_raw=$(docker run -it ghcr.io/w0rng/amnezia-wg-easy wgpw "$awg_password")
 awg_password_clean=$(printf "%s" "$awg_password_raw" | cut -d= -f2- | tr -d '\r\n')
 awg_password_clean=${awg_password_clean:1:${#awg_password_clean}-2}
