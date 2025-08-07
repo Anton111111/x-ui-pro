@@ -40,7 +40,7 @@ bash <(wget -qO- https://github.com/anton111111/x-ui-pro/raw/master/x-ui-pro.sh)
 
 **Uninstall X-UI-PRO**:x:
 ```
-sudo su -c "bash <(wget -qO- https://raw.githubusercontent.com/anton111111/x-ui-pro/master/x-ui-pro.sh) -Uninstall yes"
+sudo su -c "bash <(wget -qO- https://raw.githubusercontent.com/anton111111/x-ui-pro/master/x-ui-pro.sh) -uninstall yes"
 ```
 
 **backup panel and nginx configs**:x:

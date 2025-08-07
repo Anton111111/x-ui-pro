@@ -107,7 +107,7 @@ while true; do
   if [[ -n "$domain" ]]; then
     break
   fi
-  echo -en "Enter available subdomain (sub.domain.tld): " && read domain
+  echo -en "Enter available subdomain for panels (sub.domain.tld): " && read domain
 done
 
 domain=$(echo "$domain" 2>&1 | tr -d '[:space:]')
