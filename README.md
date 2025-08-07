@@ -1,20 +1,25 @@
-## x-ui-pro (x-ui + nginx) modification of https://github.com/GFW4Fun/x-ui-pro for REALITY
+## x-ui-pro (x-ui + nginx) modification of https://github.com/mozaroc/x-ui-pro
+
+- Modifications:
+  - Auto install panel AmneziaWG Easy
+  - Clean script and nginx config
+  - Removed subpages
+  - Removed sub2sing-box
+
 - Auto Installation (lightweight)
 - Auto SSL renewal / Daily reload Nginx X-ui
-- Handle **REALITY** and **WebSocket** via **nginx**.
+- Handle **REALITY** via **nginx**.
 - Multi-user and config via port **443**
 - Auto enabled subscriptions via port **443**
-- Auto configured VLESS+Reality and VLESSoverWebSocket
-- **Custom Web Sub Page**
-- Feature that allows the use of **custom client configurations for SING-BOX & CLASH META**
-- **Local instance sub2sing-box**
+- Auto configured VLESS+Reality
 - Auto configured Firewall
 - More security and low detection with nginx
 - Compatible with Cloudflare (only for WebSocket/GRPC)
 - Random 150+ fake template!
 - Linux Debian12/Ubuntu24!
   >
-   **You need TWO domains or subdomains**
+
+**You need two domains or subdomains**
   1. For panel and WebSocket/GRPC/HttpUgrade/SplitHttp
   2. For REALITY destination
   >
@@ -24,10 +29,10 @@
   
 ➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖
 
-### Install X-UI-PRO
+### Install X-UI-PRO and AmneziaWG Easy
 
 ```
-bash <(wget -qO- https://github.com/mozaroc/x-ui-pro/raw/master/x-ui-pro.sh) -install yes -panel 1 -ONLY_CF_IP_ALLOW no
+bash <(wget -qO- https://github.com/anton111111/x-ui-pro/raw/master/x-ui-pro.sh) -install yes -panel 1 -ONLY_CF_IP_ALLOW no
 ```
 > 
 > Do not change SubDomain for renew SSL❗
@@ -35,29 +40,11 @@ bash <(wget -qO- https://github.com/mozaroc/x-ui-pro/raw/master/x-ui-pro.sh) -in
 
 **Uninstall X-UI-PRO**:x:
 ```
-sudo su -c "bash <(wget -qO- https://raw.githubusercontent.com/mozaroc/x-ui-pro/master/x-ui-pro.sh) -Uninstall yes"
+sudo su -c "bash <(wget -qO- https://raw.githubusercontent.com/anton111111/x-ui-pro/master/x-ui-pro.sh) -Uninstall yes"
 ```
 
 **backup panel and nginx configs**:x:
 ```
-sudo su -c "bash <(wget -qO- https://raw.githubusercontent.com/mozaroc/x-ui-pro/master/backup.sh)"
+sudo su -c "bash <(wget -qO- https://raw.githubusercontent.com/anton111111/x-ui-pro/master/backup.sh)"
 ```
 
-➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖
-### Screenshots :wrench:🐧⚙️
->
-**How to open custom web sub page?**
->
-![](https://github.com/legiz-ru/x-ui-pro/blob/master/media/CustomWebSubHow2Open.png?raw=true)
->
-**Main Page custom web sub**
->
-![](https://github.com/legiz-ru/x-ui-pro/blob/master/media/CustomWebSub.png?raw=true)
->
-**sub2sing-box section on custom web sub page**
->
-![](https://github.com/legiz-ru/x-ui-pro/blob/master/media/CustomWebSubSingBox.png?raw=true)
->
-**local instance sub2sing-box fork by legiz**
->
-![](https://github.com/legiz-ru/x-ui-pro/blob/master/media/sub2sing.png?raw=true)
