@@ -136,14 +136,15 @@ if [[ ${INSTALL} == *"y"* ]]; then
 
   version=$(grep -oP '(?<=VERSION_ID=")[0-9]+' /etc/os-release)
 
-  # Проверяем, является ли версия 20 или 22
-  if [[ "$version" == "20" || "$version" == "22" ]]; then
-    echo "Версия системы: Ubuntu $version"
-  fi
-
   $Pak -y update
 
   $Pak -y install curl wget jq bash sudo nginx-full certbot python3-certbot-nginx sqlite3 ufw
+  
+  # Install Docker
+  if ! command -v docker &>/dev/null; then
+    curl -fsSL https://get.docker.com | bash
+    systemctl enable --now docker
+  fi
 
   systemctl daemon-reload && systemctl enable --now nginx
 fi
