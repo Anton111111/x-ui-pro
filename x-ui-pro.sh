@@ -443,10 +443,10 @@ shor=($(openssl rand -hex 8) $(openssl rand -hex 8) $(openssl rand -hex 8) $(ope
 if systemctl is-active --quiet x-ui; then
   x-ui restart
 else
-  PANEL=("https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh"
-    "https://raw.githubusercontent.com/MHSanaei/3x-ui/refs/tags/v2.6.0/install.sh"
-    "https://raw.githubusercontent.com/FranzKafkaYu/x-ui/master/install_en.sh"
-  )
+	PANEL=( "https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh"
+			"https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh"
+			"https://raw.githubusercontent.com/FranzKafkaYu/x-ui/master/install_en.sh"
+		)
 
   printf 'n\n' | bash <(wget -qO- "${PANEL[$PNLNUM]}")
   update_xuidb
