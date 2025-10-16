@@ -44,88 +44,100 @@ config_password=$(gen_random_string 10)
 
 ################################Get arguments###########################################################
 while [ "$#" -gt 0 ]; do
-  case "$1" in
-  -install)
-    INSTALL="$2"
-    shift 2
-    ;;
-  -panel)
-    PNLNUM="$2"
-    shift 2
-    ;;
-  -subdomain)
-    domain="$2"
-    shift 2
-    ;;
-  -reality_domain)
-    reality_domain="$2"
-    shift 2
-    ;;
-  -awg_password)
-    awg_password="$2"
-    shift 2
-    ;;
-  -ONLY_CF_IP_ALLOW)
-    CFALLOW="$2"
-    shift 2
-    ;;
-  -websub)
-    CUSTOMWEBSUB="$2"
-    shift 2
-    ;;
-  -clash)
-    CLASH="$2"
-    shift 2
-    ;;
-  -uninstall)
-    UNINSTALL="$2"
-    shift 2
-    ;;
-  *) shift 1 ;;
-  esac
+	case "$1" in
+	-install)
+		INSTALL="$2"
+		shift 2
+		;;
+	-panel)
+		PNLNUM="$2"
+		shift 2
+		;;
+	-panelpath)
+		panel_path="$2"
+		shift 2
+		;;
+	-awgpanelpath)
+		awg_panel_path="$2"
+		shift 2
+		;;
+	-subpath)
+		sub_path="$2"
+		shift 2
+		;;
+	-subdomain)
+		domain="$2"
+		shift 2
+		;;
+	-reality_domain)
+		reality_domain="$2"
+		shift 2
+		;;
+	-awg_password)
+		awg_password="$2"
+		shift 2
+		;;
+	-ONLY_CF_IP_ALLOW)
+		CFALLOW="$2"
+		shift 2
+		;;
+	-websub)
+		CUSTOMWEBSUB="$2"
+		shift 2
+		;;
+	-clash)
+		CLASH="$2"
+		shift 2
+		;;
+	-uninstall)
+		UNINSTALL="$2"
+		shift 2
+		;;
+	*) shift 1 ;;
+	esac
 done
 
 ##############################Uninstall#################################################################
 uninstall_xui() {
-  printf 'y\n' | x-ui uninstall
-  rm -rf "/etc/x-ui/" "/usr/local/x-ui/" "/usr/bin/x-ui/"
-  $Pak -y remove nginx nginx-common nginx-core nginx-full python3-certbot-nginx
-  $Pak -y purge nginx nginx-common nginx-core nginx-full python3-certbot-nginx
-  $Pak -y autoremove
-  $Pak -y autoclean
-  rm -rf "/var/www/html/" "/etc/nginx/" "/usr/share/nginx/"
-  crontab -l | grep -v "certbot\|x-ui\|cloudflareips" | crontab -
-  docker rm -f amnezia-wg-easy >/dev/null 2>&1
-  rm -rf "/etc/amnezia-wg-easy/"
+	printf 'y\n' | x-ui uninstall
+	rm -rf "/etc/x-ui/" "/usr/local/x-ui/" "/usr/bin/x-ui/"
+	$Pak -y remove nginx nginx-common nginx-core nginx-full python3-certbot-nginx
+	$Pak -y purge nginx nginx-common nginx-core nginx-full python3-certbot-nginx
+	$Pak -y autoremove
+	$Pak -y autoclean
+	rm -rf "/var/www/html/" "/etc/nginx/" "/usr/share/nginx/"
+	crontab -l | grep -v "certbot\|x-ui\|cloudflareips" | crontab -
+	docker rm -f amnezia-wg-easy >/dev/null 2>&1
+	rm -rf "/etc/amnezia-wg-easy/"
 }
 if [[ ${UNINSTALL} == *"y"* ]]; then
-  uninstall_xui
-  clear && msg_ok "Completely Uninstalled!" && exit 1
+	uninstall_xui
+	clear && msg_ok "Completely Uninstalled!" && exit 1
 fi
 ##############################Input Validations########################################################
 while true; do
-  if [[ -n "$domain" ]]; then
-    break
-  fi
-  echo -en "Enter available subdomain for panels (sub.domain.tld): " && read domain
+	if [[ -n "$domain" ]]; then
+		break
+	fi
+	echo -en "Enter available subdomain for panels (sub.domain.tld): " && read domain
 done
 
 domain=$(echo "$domain" 2>&1 | tr -d '[:space:]')
 
 while true; do
-  if [[ -n "$reality_domain" ]]; then
-    break
-  fi
-  echo -en "Enter available subdomain for REALITY (sub.domain.tld): " && read reality_domain
+	if [[ -n "$reality_domain" ]]; then
+		break
+	fi
+	echo -en "Enter available subdomain for REALITY (sub.domain.tld): " && read reality_domain
 done
 
 reality_domain=$(echo "$reality_domain" 2>&1 | tr -d '[:space:]')
 
 while true; do
-  if [[ -n "$awg_password" ]]; then
-    break
-  fi
-  echo -en "Enter Password for AWG: " && read awg_password
+	if [[ -n "$awg_password" ]]; then
+		break
+	fi
+	echo -en "Enter Password for AWG: " && read awg_password
 done
 
 awg_password=$(echo "$awg_password" 2>&1 | tr -d '[:space:]')
@@ -134,19 +146,19 @@ awg_password=$(echo "$awg_password" 2>&1 | tr -d '[:space:]')
 ufw disable
 if [[ ${INSTALL} == *"y"* ]]; then
 
-  version=$(grep -oP '(?<=VERSION_ID=")[0-9]+' /etc/os-release)
+	version=$(grep -oP '(?<=VERSION_ID=")[0-9]+' /etc/os-release)
 
-  $Pak -y update
+	$Pak -y update
 
-  $Pak -y install curl wget jq bash sudo nginx-full certbot python3-certbot-nginx sqlite3 ufw
-  
-  # Install Docker
-  if ! command -v docker &>/dev/null; then
-    curl -fsSL https://get.docker.com | bash
-    systemctl enable --now docker
-  fi
+	$Pak -y install curl wget jq bash sudo nginx-full certbot python3-certbot-nginx sqlite3 ufw
 
-  systemctl daemon-reload && systemctl enable --now nginx
+	# Install Docker
+	if ! command -v docker &>/dev/null; then
+		curl -fsSL https://get.docker.com | bash
+		systemctl enable --now docker
+	fi
+
+	systemctl daemon-reload && systemctl enable --now nginx
 fi
 systemctl stop nginx
 fuser -k 80/tcp 80/udp 443/tcp 443/udp 2>/dev/null
@@ -181,23 +193,23 @@ echo "}" >> $CLOUDFLARE_WHITELIST_PATH
 EOF
 sudo bash "/etc/nginx/cloudflareips.sh" >/dev/null 2>&1
 if [[ ${CFALLOW} == *"y"* ]]; then
-  CF_IP=""
+	CF_IP=""
 else
-  CF_IP="#"
+	CF_IP="#"
 fi
 ###################################Get Installed XUI Port/Path##########################################
 if [[ -f $XUIDB ]]; then
-  XUIPORT=$(sqlite3 -list $XUIDB 'SELECT "value" FROM settings WHERE "key"="webPort" LIMIT 1;' 2>&1)
-  XUIPATH=$(sqlite3 -list $XUIDB 'SELECT "value" FROM settings WHERE "key"="webBasePath" LIMIT 1;' 2>&1)
-  if [[ $XUIPORT -gt 0 && $XUIPORT != "54321" && $XUIPORT != "2053" ]] && [[ ${#XUIPORT} -gt 4 ]]; then
-    RNDSTR=$(echo "$XUIPATH" 2>&1 | tr -d '/')
-    PORT=$XUIPORT
-    sqlite3 $XUIDB <<EOF
+	XUIPORT=$(sqlite3 -list $XUIDB 'SELECT "value" FROM settings WHERE "key"="webPort" LIMIT 1;' 2>&1)
+	XUIPATH=$(sqlite3 -list $XUIDB 'SELECT "value" FROM settings WHERE "key"="webBasePath" LIMIT 1;' 2>&1)
+	if [[ $XUIPORT -gt 0 && $XUIPORT != "54321" && $XUIPORT != "2053" ]] && [[ ${#XUIPORT} -gt 4 ]]; then
+		RNDSTR=$(echo "$XUIPATH" 2>&1 | tr -d '/')
+		PORT=$XUIPORT
+		sqlite3 $XUIDB <<EOF
 	DELETE FROM "settings" WHERE ( "key"="webCertFile" ) OR ( "key"="webKeyFile" ); 
 	INSERT INTO "settings" ("key", "value") VALUES ("webCertFile",  "");
 	INSERT INTO "settings" ("key", "value") VALUES ("webKeyFile", "");
 EOF
-  fi
+	fi
 fi
 #################################Nginx Config###########################################################
 mkdir -p /etc/nginx/stream-enabled
@@ -423,38 +435,38 @@ EOF
 
 ##################################Check Nginx status####################################################
 if [[ -f "/etc/nginx/sites-available/${domain}" ]]; then
-  unlink "/etc/nginx/sites-enabled/default" >/dev/null 2>&1
-  rm -f "/etc/nginx/sites-enabled/default" "/etc/nginx/sites-available/default"
-  ln -s "/etc/nginx/sites-available/${domain}" "/etc/nginx/sites-enabled/" 2>/dev/null
-  ln -s "/etc/nginx/sites-available/${reality_domain}" "/etc/nginx/sites-enabled/" 2>/dev/null
-  ln -s "/etc/nginx/sites-available/80.conf" "/etc/nginx/sites-enabled/" 2>/dev/null
+	unlink "/etc/nginx/sites-enabled/default" >/dev/null 2>&1
+	rm -f "/etc/nginx/sites-enabled/default" "/etc/nginx/sites-available/default"
+	ln -s "/etc/nginx/sites-available/${domain}" "/etc/nginx/sites-enabled/" 2>/dev/null
+	ln -s "/etc/nginx/sites-available/${reality_domain}" "/etc/nginx/sites-enabled/" 2>/dev/null
+	ln -s "/etc/nginx/sites-available/80.conf" "/etc/nginx/sites-enabled/" 2>/dev/null
 else
-  msg_err "${domain} nginx config not exist!" && exit 1
+	msg_err "${domain} nginx config not exist!" && exit 1
 fi
 
 if [[ $(nginx -t 2>&1 | grep -o 'successful') != "successful" ]]; then
-  msg_err "nginx config is not ok!" && exit 1
+	msg_err "nginx config is not ok!" && exit 1
 else
-  systemctl start nginx
+	systemctl start nginx
 fi
 
 ##############################generate keys###########################################################
 shor=($(openssl rand -hex 8) $(openssl rand -hex 8) $(openssl rand -hex 8) $(openssl rand -hex 8) $(openssl rand -hex 8) $(openssl rand -hex 8) $(openssl rand -hex 8) $(openssl rand -hex 8))
 ###################################Install X-UI#########################################################
 if systemctl is-active --quiet x-ui; then
-  x-ui restart
+	x-ui restart
 else
-	PANEL=( "https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh"
-			"https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh"
-			"https://raw.githubusercontent.com/FranzKafkaYu/x-ui/master/install_en.sh"
-		)
+	PANEL=("https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh"
+		"https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh"
+		"https://raw.githubusercontent.com/FranzKafkaYu/x-ui/master/install_en.sh"
+	)
 
-  printf 'n\n' | bash <(wget -qO- "${PANEL[$PNLNUM]}")
-  update_xuidb
-  if ! systemctl is-enabled --quiet x-ui; then
-    systemctl daemon-reload && systemctl enable x-ui.service
-  fi
-  x-ui restart
+	printf 'n\n' | bash <(wget -qO- "${PANEL[$PNLNUM]}")
+	update_xuidb
+	if ! systemctl is-enabled --quiet x-ui; then
+		systemctl daemon-reload && systemctl enable x-ui.service
+	fi
+	x-ui restart
 fi
 
 ###################################Install AmneziaWG Easy#########################################################
@@ -463,22 +475,22 @@ awg_password_clean=$(printf "%s" "$awg_password_raw" | cut -d= -f2- | tr -d '\r\
 awg_password_clean=${awg_password_clean:1:${#awg_password_clean}-2}
 docker rm -f amnezia-wg-easy >/dev/null 2>&1
 docker run -d \
-  --name=amnezia-wg-easy \
-  -e LANG=en \
-  -e WG_HOST=$IP4 \
-  -e PASSWORD_HASH=$awg_password_clean \
-  -e PORT=51821 \
-  -e WG_PORT=51820 \
-  -v /etc/amnezia-wg-easy:/etc/wireguard \
-  -p 51820:51820/udp \
-  -p 127.0.0.1:51821:51821/tcp \
-  --cap-add=NET_ADMIN \
-  --cap-add=SYS_MODULE \
-  --sysctl="net.ipv4.conf.all.src_valid_mark=1" \
-  --sysctl="net.ipv4.ip_forward=1" \
-  --device=/dev/net/tun:/dev/net/tun \
-  --restart unless-stopped \
-  ghcr.io/w0rng/amnezia-wg-easy
+	--name=amnezia-wg-easy \
+	-e LANG=en \
+	-e WG_HOST=$IP4 \
+	-e PASSWORD_HASH=$awg_password_clean \
+	-e PORT=51821 \
+	-e WG_PORT=51820 \
+	-v /etc/amnezia-wg-easy:/etc/wireguard \
+	-p 51820:51820/udp \
+	-p 127.0.0.1:51821:51821/tcp \
+	--cap-add=NET_ADMIN \
+	--cap-add=SYS_MODULE \
+	--sysctl="net.ipv4.conf.all.src_valid_mark=1" \
+	--sysctl="net.ipv4.ip_forward=1" \
+	--device=/dev/net/tun:/dev/net/tun \
+	--restart unless-stopped \
+	ghcr.io/w0rng/amnezia-wg-easy
 
 ######################enable bbr and tune system########################################################
 apt-get install -yqq --no-install-recommends ca-certificates
@@ -502,16 +514,16 @@ sudo su -c "bash <(wget -qO- https://raw.githubusercontent.com/mozaroc/x-ui-pro/
 ######################cronjob for ssl/reload service/cloudflareips######################################
 crontab -l | grep -v "certbot\|x-ui\|cloudflareips" | crontab -
 (
-  crontab -l 2>/dev/null
-  echo '@daily x-ui restart > /dev/null 2>&1 && nginx -s reload;'
+	crontab -l 2>/dev/null
+	echo '@daily x-ui restart > /dev/null 2>&1 && nginx -s reload;'
 ) | crontab -
 (
-  crontab -l 2>/dev/null
-  echo '@weekly bash /etc/nginx/cloudflareips.sh > /dev/null 2>&1;'
+	crontab -l 2>/dev/null
+	echo '@weekly bash /etc/nginx/cloudflareips.sh > /dev/null 2>&1;'
 ) | crontab -
 (
-  crontab -l 2>/dev/null
-  echo '@monthly certbot renew --nginx --non-interactive --post-hook "nginx -s reload" > /dev/null 2>&1;'
+	crontab -l 2>/dev/null
+	echo '@monthly certbot renew --nginx --non-interactive --post-hook "nginx -s reload" > /dev/null 2>&1;'
 ) | crontab -
 ##################################ufw###################################################################
 ufw disable
@@ -522,26 +534,26 @@ ufw --force enable
 ##################################Show Details##########################################################
 
 if systemctl is-active --quiet x-ui; then
-  clear
-  printf '0\n' | x-ui | grep --color=never -i ':'
-  msg_inf "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
-  nginx -T | grep -i 'ssl_certificate\|ssl_certificate_key'
-  msg_inf "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
-  certbot certificates | grep -i 'Path:\|Domains:\|Expiry Date:'
+	clear
+	printf '0\n' | x-ui | grep --color=never -i ':'
+	msg_inf "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+	nginx -T | grep -i 'ssl_certificate\|ssl_certificate_key'
+	msg_inf "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+	certbot certificates | grep -i 'Path:\|Domains:\|Expiry Date:'
 
-  msg_inf "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
-  msg_inf "X-UI Secure Panel: https://${domain}/${panel_path}/\n"
-  echo -e "Username:  ${config_username} \n"
-  echo -e "Password:  ${config_password} \n"
-  msg_inf "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
-  msg_inf "AmneziaWG Easy Secure Panel: https://${domain}/${awg_panel_path}/\n"
-  echo -e "Password:  ${awg_password} \n"
-  msg_inf "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
-  msg_inf "XKeen Subsciption: https://${domain}/${sub_path}/xkeen\n"
-  msg_inf "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
-  msg_inf "Please Save this Screen!!"
+	msg_inf "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+	msg_inf "X-UI Secure Panel: https://${domain}/${panel_path}/\n"
+	echo -e "Username:  ${config_username} \n"
+	echo -e "Password:  ${config_password} \n"
+	msg_inf "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+	msg_inf "AmneziaWG Easy Secure Panel: https://${domain}/${awg_panel_path}/\n"
+	echo -e "Password:  ${awg_password} \n"
+	msg_inf "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+	msg_inf "XKeen Subsciption: https://${domain}/${sub_path}/xkeen\n"
+	msg_inf "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+	msg_inf "Please Save this Screen!!"
 else
-  nginx -t && printf '0\n' | x-ui | grep --color=never -i ':'
-  msg_err "sqlite and x-ui to be checked, try on a new clean linux! "
+	nginx -t && printf '0\n' | x-ui | grep --color=never -i ':'
+	msg_err "sqlite and x-ui to be checked, try on a new clean linux! "
 fi
 #################################################N-joy##################################################
