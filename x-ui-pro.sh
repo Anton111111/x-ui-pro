@@ -53,6 +53,14 @@ while [ "$#" -gt 0 ]; do
 		PNLNUM="$2"
 		shift 2
 		;;
+	-panelusername)
+		config_username="$2"
+		shift 2
+		;;
+	-panelpassword)
+		config_password="$2"
+		shift 2
+		;;
 	-panelpath)
 		panel_path="$2"
 		shift 2
