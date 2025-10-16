@@ -89,6 +89,7 @@ update_xuidb() {
     sub_uri=https://${domain}/${sub_path}/
     json_uri=https://${domain}/${json_path}/
     emoji_flag=$(LC_ALL=en_US.UTF-8 curl -s https://ipwho.is/ | jq -r '.flag.emoji')
+	msg_inf "Start update XUIDB $XUIDB"
     sqlite3 $XUIDB <<EOF
 INSERT INTO "settings" ("key", "value") VALUES ("subPort",  '${sub_port}');
 INSERT INTO "settings" ("key", "value") VALUES ("subPath",  '/${sub_path}/');
@@ -225,6 +226,7 @@ VALUES
 }'
   );
 EOF
+msg_inf "End update XUIDB $XUIDB"
     /usr/local/x-ui/x-ui setting -username "${config_username}" -password "${config_password}" -port "${panel_port}" -webBasePath "${panel_path}"
     x-ui start
   else
