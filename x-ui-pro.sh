@@ -542,7 +542,6 @@ ufw --force enable
 ##################################Show Details##########################################################
 
 if systemctl is-active --quiet x-ui; then
-	clear
 	printf '0\n' | x-ui | grep --color=never -i ':'
 	msg_inf "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
 	nginx -T | grep -i 'ssl_certificate\|ssl_certificate_key'
