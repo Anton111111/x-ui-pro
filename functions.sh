@@ -6,45 +6,45 @@ msg_inf() { echo -e "\e[1;34m$1\e[0m"; }
 
 ##################################generate ports and paths#############################################################
 get_port() {
-  echo $((((RANDOM << 15) | RANDOM) % 49152 + 10000))
+	echo $((((RANDOM << 15) | RANDOM) % 49152 + 10000))
 }
 
 gen_random_string() {
-  local length="$1"
-  local random_string=$(LC_ALL=C tr -dc 'a-zA-Z0-9' </dev/urandom | fold -w "$length" | head -n 1)
-  echo "$random_string"
+	local length="$1"
+	local random_string=$(LC_ALL=C tr -dc 'a-zA-Z0-9' </dev/urandom | fold -w "$length" | head -n 1)
+	echo "$random_string"
 }
 check_free() {
-  local port=$1
-  nc -z 127.0.0.1 $port &>/dev/null
-  return $?
+	local port=$1
+	nc -z 127.0.0.1 $port &>/dev/null
+	return $?
 }
 
 make_port() {
-  while true; do
-    PORT=$(get_port)
-    if ! check_free $PORT; then
-      echo $PORT
-      break
-    fi
-  done
+	while true; do
+		PORT=$(get_port)
+		if ! check_free $PORT; then
+			echo $PORT
+			break
+		fi
+	done
 }
 
 ##############################Install SSL###############################################################
 install_cert() {
-  cert_domain="$1"
-  certbot certonly --standalone --non-interactive --agree-tos --register-unsafely-without-email -d "$cert_domain"
-  if [[ ! -d "/etc/letsencrypt/live/${cert_domain}/" ]]; then
-    systemctl start nginx >/dev/null 2>&1
-    msg_err "$cert_domain SSL could not be generated! Check Domain/IP Or Enter new domain!" && exit 1
-  fi
+	cert_domain="$1"
+	certbot certonly --standalone --non-interactive --agree-tos --register-unsafely-without-email -d "$cert_domain"
+	if [[ ! -d "/etc/letsencrypt/live/${cert_domain}/" ]]; then
+		systemctl start nginx >/dev/null 2>&1
+		msg_err "$cert_domain SSL could not be generated! Check Domain/IP Or Enter new domain!" && exit 1
+	fi
 }
 
 #################################Nginx Config###########################################################
 create_service_nginx() {
-  service_domain="$1"
-  port="$2"
-  cat >"/etc/nginx/sites-available/${service_domain}" <<EOF
+	service_domain="$1"
+	port="$2"
+	cat >"/etc/nginx/sites-available/${service_domain}" <<EOF
 server {
 	server_tokens off;
 	server_name ${service_domain};
@@ -75,21 +75,40 @@ server {
 EOF
 }
 
+add_service_panel_path_nginx() {
+	path="$1"
+	port="$2"
+	cat >"/etc/nginx/sites-available/${domain}" <<EOF
+	
+	#${domain}/${path}
+	location /${path}/ {
+		proxy_redirect off;
+		proxy_set_header Host \$host;
+		proxy_set_header X-Real-IP \$remote_addr;
+		proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+		proxy_pass http://127.0.0.1:${port};
+    rewrite ^/${path}/(.*)$ /\$1 break;
+		break;
+	}
+
+EOF
+}
+
 ########################################Update X-UI Port/Path for first INSTALL#########################
 update_xuidb() {
-  if [[ -f $XUIDB ]]; then
-    x-ui stop
-    output=$(/usr/local/x-ui/bin/xray-linux-amd64 x25519)
-    private_key=$(echo "$output" | grep "^PrivateKey:" | awk '{print $2}')
-    public_key=$(echo "$output" | grep "^Password:" | awk '{print $2}')
-    client_id=$(/usr/local/x-ui/bin/xray-linux-amd64 uuid)
-    client_id2=$(/usr/local/x-ui/bin/xray-linux-amd64 uuid)
-    client_id3=$(/usr/local/x-ui/bin/xray-linux-amd64 uuid)
-    sub_uri=https://${domain}/${sub_path}/
-    json_uri=https://${domain}/${json_path}/
-    emoji_flag=$(LC_ALL=en_US.UTF-8 curl -s https://ipwho.is/ | jq -r '.flag.emoji')
-	msg_inf "Start update XUIDB $XUIDB"
-    sqlite3 $XUIDB <<EOF
+	if [[ -f $XUIDB ]]; then
+		x-ui stop
+		output=$(/usr/local/x-ui/bin/xray-linux-amd64 x25519)
+		private_key=$(echo "$output" | grep "^PrivateKey:" | awk '{print $2}')
+		public_key=$(echo "$output" | grep "^Password:" | awk '{print $2}')
+		client_id=$(/usr/local/x-ui/bin/xray-linux-amd64 uuid)
+		client_id2=$(/usr/local/x-ui/bin/xray-linux-amd64 uuid)
+		client_id3=$(/usr/local/x-ui/bin/xray-linux-amd64 uuid)
+		sub_uri=https://${domain}/${sub_path}/
+		json_uri=https://${domain}/${json_path}/
+		emoji_flag=$(LC_ALL=en_US.UTF-8 curl -s https://ipwho.is/ | jq -r '.flag.emoji')
+		msg_inf "Start update XUIDB $XUIDB"
+		sqlite3 $XUIDB <<EOF
 INSERT INTO "settings" ("key", "value") VALUES ("subPort",  '${sub_port}');
 INSERT INTO "settings" ("key", "value") VALUES ("subPath",  '/${sub_path}/');
 INSERT INTO "settings" ("key", "value") VALUES ("subURI",  '${sub_uri}');
@@ -222,10 +241,10 @@ VALUES
 }'
   );
 EOF
-msg_inf "End update XUIDB $XUIDB"
-    /usr/local/x-ui/x-ui setting -username "${config_username}" -password "${config_password}" -port "${panel_port}" -webBasePath "${panel_path}"
-    x-ui start
-  else
-    msg_err "x-ui.db file not exist! Maybe x-ui isn't installed." && exit 1
-  fi
+		msg_inf "End update XUIDB $XUIDB"
+		/usr/local/x-ui/x-ui setting -username "${config_username}" -password "${config_password}" -port "${panel_port}" -webBasePath "${panel_path}"
+		x-ui start
+	else
+		msg_err "x-ui.db file not exist! Maybe x-ui isn't installed." && exit 1
+	fi
 }

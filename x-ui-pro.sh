@@ -41,6 +41,7 @@ ws_path=$(tr -dc A-Za-z0-9 </dev/urandom | head -c "$(shuf -i 6-12 -n 1)")web_pa
 xhttp_path=$(tr -dc A-Za-z0-9 </dev/urandom | head -c "$(shuf -i 6-12 -n 1)")
 config_username=$(gen_random_string 10)
 config_password=$(gen_random_string 10)
+additional_path_ports=""
 
 ################################Get arguments###########################################################
 while [ "$#" -gt 0 ]; do
@@ -99,6 +100,10 @@ while [ "$#" -gt 0 ]; do
 		;;
 	-uninstall)
 		UNINSTALL="$2"
+		shift 2
+		;;
+	-additionalpathports)
+		additional_path_ports="$2"
 		shift 2
 		;;
 	*) shift 1 ;;
@@ -288,17 +293,20 @@ server {
 		proxy_pass http://127.0.0.1:${panel_port};
 		break;
 	}
-  #AmneziaWG Easy Panel
-	location /${awg_panel_path}/ {
-		proxy_redirect off;
-		proxy_set_header Host \$host;
-		proxy_set_header X-Real-IP \$remote_addr;
-		proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-		proxy_pass http://127.0.0.1:51821;
-    rewrite ^/${awg_panel_path}/(.*)$ /\$1 break;
-		break;
-	}
-        
+
+EOF
+
+add_service_panel_path_nginx "${awg_panel_path}" "51821"
+
+if [[ -n "$additional_path_ports" ]]; then
+	IFS=',' read -ra ADDR <<<"$additional_path_ports"
+	for i in "${ADDR[@]}"; do
+		path_port=($(echo "$i" | tr ':' ' '))
+		add_service_panel_path_nginx "${path_port[0]}" "${path_port[1]}"
+	done
+fi
+
+cat >"/etc/nginx/sites-available/${domain}" <<EOF
  	#Subscription Path (simple/encode)
 	location /${sub_path}/ {
     if (\$hack = 1) {return 404;}
